@@ -2,8 +2,8 @@
 class AppConstants {
   // Đổi thành URL backend production khi deploy
   // Development: http://127.0.0.1:5000/api
-  // Production: https://logbook-backend.onrender.com/api
-  static const String baseUrl = 'https://logbook-backend.onrender.com/api';
+  // Production: https://logbook-backend-pxuq.onrender.com/api
+  static const String baseUrl = 'https://logbook-backend-pxuq.onrender.com/api';
   
   // Các endpoint cụ thể
   static const String seasonsUrl = '$baseUrl/seasons';

@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const LogEntry = require('../models/LogEntry');
+const HiddenTask = require('../models/HiddenTask');
 const { isAuth } = require('../middleware/auth');
 const { successResponse, errorResponse } = require('../utils/responseFormatter');
 const { asyncHandler } = require('../middleware/errorHandler');
@@ -45,6 +46,13 @@ router.post('/', asyncHandler(async (req, res) => {
 
     const savedLog = await newLogEntry.save();
     
+    // 🔥 TẠO LẠI TASK → GỠ TRẠNG THÁI BỎ QUA
+    await HiddenTask.deleteMany({
+        season: savedLog.season,
+        user: savedLog.user,
+        taskName: savedLog.taskName,
+        reason: 'SKIPPED'
+    });
     
     console.log('✅ Saved manual log:', {
         _id: savedLog._id,

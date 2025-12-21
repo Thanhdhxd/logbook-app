@@ -402,17 +402,6 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
                         ),
                       )),
                 ],
-                // Hiển thị ghi chú (nếu có)
-                if (isCompleted && task.notes.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    task.notes,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

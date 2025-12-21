@@ -73,32 +73,33 @@ router.post('/', asyncHandler(async (req, res) => {
 
 /**
  * GET /api/seasons/daily/:seasonId
- * Chức năng: Lấy danh sách công việc cần làm hôm nay (đã fix logic ẩn task)
+ * Chức năng: Lấy danh sách công việc cần làm hôm nay
  */
 router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
     const { seasonId } = req.params;
     
-    // 1. Kiểm tra Season và Convert ID chuẩn
-    if (!mongoose.Types.ObjectId.isValid(seasonId)) {
-        return errorResponse(res, 'ID mùa vụ không hợp lệ', 400);
-    }
-    const seasonObjectId = new mongoose.Types.ObjectId(seasonId);
+    console.log('\n📍 GET /api/seasons/daily/:seasonId');
+    console.log('  - Requested seasonId:', seasonId);
 
-    const season = await FarmSeason.findById(seasonObjectId).populate('planTemplate');
+    // 1. Lấy thông tin mùa vụ và Template
+    const season = await FarmSeason.findById(seasonId).populate('planTemplate');
     if (!season) {
         return errorResponse(res, 'Không tìm thấy mùa vụ', 404);
     }
 
     const currentDay = getDaysSinceStart(season.startDate);
+    const seasonObjectId = mongoose.Types.ObjectId.isValid(seasonId) 
+        ? new mongoose.Types.ObjectId(seasonId)
+        : seasonId;
     let dailyTasks = [];
+    let currentStage = null;
 
-    // 2. Lấy danh sách các task đã bị ẩn (Bỏ qua hoặc Hoàn thành)
-    // Chúng ta lấy trước để lọc ngay khi duyệt log
-    const hiddenTasks = await HiddenTask.find({ season: seasonObjectId });
-    // Chuyển thành Set và trim() để so sánh chính xác tuyệt đối
-    const hiddenTaskNames = new Set(hiddenTasks.map(ht => ht.taskName.trim()));
+    // ✅ KHÔNG TỰ ĐỘNG LẤY TASKS TỪ TEMPLATE
+    // Phần "Công việc hôm nay" là cho người dùng tự tạo công việc thủ công
+    console.log('📝 Công việc hôm nay - Chỉ hiển thị nhật ký thủ công');
 
-    // 3. Lấy manual logs trong 30 ngày qua
+    // Lấy manual logs (nhật ký thủ công) gần đây
+    // Lấy tất cả manual logs trong 30 ngày gần nhất
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -110,29 +111,27 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
             $ne: null,
             $gte: thirtyDaysAgo
         }
-    }).sort({ completedAt: -1 });
+    }).select('taskName notes usedMaterials completedAt location').sort({ completedAt: -1 });
+    
+    console.log('🔍 Manual Logs Query:');
+    console.log('  - Found manual logs:', manualLogs.length);
 
-    // 4. Gộp logs và LỌC BỎ task đã ẩn
+    // Gộp manual logs theo taskName (để tránh trùng lặp)
     const manualLogsMap = new Map();
-
     manualLogs.forEach(log => {
-        const normalizedName = log.taskName.trim();
-        
-        // CHỈ xử lý nếu task này CHƯA nằm trong danh sách ẩn
-        if (!hiddenTaskNames.has(normalizedName)) {
-            if (!manualLogsMap.has(normalizedName)) {
-                manualLogsMap.set(normalizedName, log);
-            } else {
-                // Giữ lại log mới nhất
-                const existing = manualLogsMap.get(normalizedName);
-                if (new Date(log.completedAt) > new Date(existing.completedAt)) {
-                    manualLogsMap.set(normalizedName, log);
-                }
+        const taskName = log.taskName;
+        if (!manualLogsMap.has(taskName)) {
+            manualLogsMap.set(taskName, log);
+        } else {
+            // Nếu đã có, chỉ giữ log mới nhất
+            const existing = manualLogsMap.get(taskName);
+            if (new Date(log.completedAt) > new Date(existing.completedAt)) {
+                manualLogsMap.set(taskName, log);
             }
         }
     });
 
-    // 5. Build danh sách trả về
+    // CHỈ hiển thị manual logs (công việc tự tạo)
     manualLogsMap.forEach((log, taskName) => {
         dailyTasks.push({
             taskId: log._id.toString(),
@@ -149,9 +148,10 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
 
     return successResponse(res, {
         currentDay,
+        currentStage,
         farmArea: season.farmArea,
         tasks: dailyTasks
-    }, `Công việc hiện tại của mùa vụ`);
+    }, `Công việc cần làm cho Ngày ${currentDay} của mùa vụ`);
 }));
 
 /**

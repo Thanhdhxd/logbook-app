@@ -120,8 +120,7 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
   }
 
   String _formatDate(DateTime date) {
-    final weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    return 'Hôm nay, ngày ${date.day} tháng ${date.month}\n${weekdays[date.weekday % 7]}';
+    return 'Hôm nay, ngày ${date.day} tháng ${date.month}\n';
   }
 
   String _getTaskDateRange(DailyTask task) {

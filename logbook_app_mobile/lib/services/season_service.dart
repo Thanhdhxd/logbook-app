@@ -39,43 +39,40 @@ class SeasonService {
     required String seasonName,
     required String? farmArea,
     required DateTime startDate,
+    String? templateId,
   }) async {
     final url = Uri.parse(AppConstants.seasonsUrl);
-    
     try {
+      final body = {
+        'seasonName': seasonName,
+        'farmArea': farmArea,
+        'startDate': startDate.toIso8601String(),
+      };
+      if (templateId != null) {
+        body['templateId'] = templateId;
+      }
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'seasonName': seasonName,
-          'farmArea': farmArea,
-          'startDate': startDate.toIso8601String(),
-        }),
+        body: json.encode(body),
       );
-      
       if (response.statusCode == 201) {
         final responseBody = response.body;
-        
         if (responseBody.isEmpty) {
           throw Exception('Backend trả về response rỗng');
         }
-        
         final responseData = json.decode(responseBody);
         if (responseData == null) {
           throw Exception('Không thể parse response từ backend');
         }
-        
-        // Backend trả về: {success, message, data: {season: {...}}}
         final data = responseData['data'];
         if (data == null) {
           throw Exception('Backend không trả về data');
         }
-        
         final seasonData = data['season'];
         if (seasonData == null) {
           throw Exception('Backend không trả về thông tin mùa vụ');
         }
-        
         return Season.fromJson(seasonData);
       } else {
         throw Exception('Lỗi khi tạo mùa vụ: ${response.body}');

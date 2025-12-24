@@ -95,20 +95,21 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Quản lý kế hoạch'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: const Text('Quản lý kế hoạch', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
       ),
       body: Column(
         children: [
           // Nút thêm kế hoạch mới
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             color: Colors.white,
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
@@ -120,20 +121,22 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
                     _loadTemplates();
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
+                icon: const Icon(Icons.add_box, size: 32),
+                label: const Text(
                   'Thêm kế hoạch mới',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(14)),
+                  ),
+                  elevation: 2,
                 ),
               ),
             ),
@@ -197,7 +200,7 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       itemCount: _templates.length,
       itemBuilder: (context, index) {
         final template = _templates[index];
@@ -208,15 +211,15 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
 
   Widget _buildTemplateCard(PlanTemplate template) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
+            color: Colors.grey.withOpacity(0.13),
+            spreadRadius: 2,
+            blurRadius: 8,
           ),
         ],
       ),
@@ -232,26 +235,28 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
             _loadTemplates();
           }
         },
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
+                  const Icon(Icons.assignment, color: Colors.blue, size: 32),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Text(
                       template.templateName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
                       ),
                     ),
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, color: Colors.grey),
+                    icon: const Icon(Icons.more_vert, color: Colors.grey, size: 28),
                     onSelected: (value) {
                       if (value == 'delete') {
                         _deleteTemplate(template);
@@ -262,9 +267,9 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, color: Colors.red, size: 20),
-                            SizedBox(width: 8),
-                            Text('Xóa', style: TextStyle(color: Colors.red)),
+                            Icon(Icons.delete, color: Colors.red, size: 24),
+                            SizedBox(width: 10),
+                            Text('Xóa', style: TextStyle(color: Colors.red, fontSize: 18)),
                           ],
                         ),
                       ),
@@ -272,19 +277,19 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 14),
               Text(
                 'Loại cây trồng: ${template.cropType}',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 18,
                   color: Colors.grey[700],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Text(
                 '${template.stages.length} Giai đoạn - ${template.totalTasks} Công việc',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 16,
                   color: Colors.grey[600],
                 ),
               ),

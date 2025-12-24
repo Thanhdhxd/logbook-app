@@ -49,59 +49,71 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chọn Mùa Vụ'),
+        title: const Text(
+          'Chọn Mùa Vụ',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.green,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, size: 30),
             onPressed: _loadSeasons,
+            tooltip: 'Làm mới',
           ),
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateSeasonScreen(),
-            ),
-          );
-          
-          // Nếu có kết quả trả về (Season object)
-          if (result != null && mounted) {
-            // Reload danh sách mùa vụ
-            await _loadSeasons();
-            
-            // Hiển thị thông báo thành công
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Tạo mùa vụ "${result.seasonName}" thành công! 🎉',
-                          style: const TextStyle(fontSize: 16),
+      floatingActionButton: SizedBox(
+        width: 220,
+        height: 64,
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateSeasonScreen(),
+              ),
+            );
+            // Nếu có kết quả trả về (Season object)
+            if (result != null && mounted) {
+              await _loadSeasons();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.white, size: 28),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Tạo mùa vụ "${result.seasonName}" thành công! 🎉',
+                            style: const TextStyle(fontSize: 18),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 3),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.all(16),
                   ),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 3),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.all(16),
-                ),
-              );
+                );
+              }
             }
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Tạo Mùa Vụ Mới'),
+          },
+          icon: const Icon(Icons.add, size: 32),
+          label: const Text(
+            'Tạo Mùa Vụ Mới',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
       ),
     );
   }
@@ -155,27 +167,16 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       itemCount: _seasons.length,
       itemBuilder: (context, index) {
         final season = _seasons[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Icon(Icons.grass, color: Colors.white),
-            ),
-            title: Text(
-              season.seasonName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              'Vị trí: ${season.farmArea}\n'
-              'Ngày bắt đầu: ${_formatDate(season.startDate)}',
-            ),
-            isThreeLine: true,
-            trailing: const Icon(Icons.arrow_forward_ios),
+          margin: const EdgeInsets.only(bottom: 18),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
             onTap: () async {
               final result = await Navigator.push(
                 context,
@@ -183,12 +184,45 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
                   builder: (context) => SeasonDetailScreen(season: season),
                 ),
               );
-              
-              // Nếu có thay đổi (xóa mùa vụ), reload danh sách
               if (result == true && mounted) {
                 _loadSeasons();
               }
             },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.green.shade700,
+                    radius: 32,
+                    child: const Icon(Icons.grass, color: Colors.white, size: 36),
+                  ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          season.seasonName,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Vị trí: ${season.farmArea}',
+                          style: const TextStyle(fontSize: 18, color: Colors.black87),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Ngày bắt đầu: ${_formatDate(season.startDate)}',
+                          style: const TextStyle(fontSize: 18, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 32, color: Colors.grey),
+                ],
+              ),
+            ),
           ),
         );
       },

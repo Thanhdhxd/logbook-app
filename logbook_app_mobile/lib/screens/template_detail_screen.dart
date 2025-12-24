@@ -421,25 +421,33 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chi tiết kế hoạch'),
+        title: const Text('Chi tiết kế hoạch', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         actions: [
           if (_isSubmitting)
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
                 ),
               ),
             )
           else
-            TextButton(
+            TextButton.icon(
               onPressed: _saveTemplate,
-              child: const Text(
+              icon: const Icon(Icons.save, size: 28, color: Colors.white),
+              label: const Text(
                 'Lưu',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 18),
               ),
             ),
         ],
@@ -447,48 +455,62 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           children: [
             // Thông tin cơ bản
             Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 3,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Thông tin cơ bản',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.green,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildInfoRow('Tên kế hoạch', _template.templateName),
-                    const SizedBox(height: 12),
-                    _buildInfoRow('Loại cây trồng', _template.cropType),
+                    const SizedBox(height: 18),
+                    _buildInfoRow('Tên kế hoạch', _template.templateName, fontSize: 18),
+                    const SizedBox(height: 14),
+                    _buildInfoRow('Loại cây trồng', _template.cropType, fontSize: 18),
                   ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 22),
 
             // Header giai đoạn
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Giai đoạn',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    const Icon(Icons.timeline, color: Colors.blue, size: 28),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Giai đoạn',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
                 TextButton.icon(
                   onPressed: _addStage,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Thêm giai đoạn'),
+                  icon: const Icon(Icons.add, size: 24),
+                  label: const Text('Thêm giai đoạn', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  ),
                 ),
               ],
             ),
@@ -505,23 +527,25 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {double fontSize = 16}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600],
+            fontSize: fontSize - 2,
+            color: Colors.grey[700],
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
       ],
@@ -530,46 +554,48 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
 
   Widget _buildStageCard(Stage stage, int stageIndex) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 22),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header giai đoạn
             Row(
               children: [
+                const Icon(Icons.flag, color: Colors.blue, size: 28),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Giai đoạn ${stageIndex + 1}: ${stage.stageName}',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.blue,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 28),
                   onPressed: () => _deleteStage(stageIndex),
+                  tooltip: 'Xóa giai đoạn',
                 ),
               ],
             ),
-            
             const Divider(),
-            
-            const SizedBox(height: 8),
-
+            const SizedBox(height: 10),
             // Danh sách công việc
             if (stage.tasks.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   'Chưa có công việc nào',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontStyle: FontStyle.italic,
-                    fontSize: 14,
+                    fontSize: 16,
                   ),
                 ),
               )
@@ -579,20 +605,20 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                 final task = taskEntry.value;
                 return _buildTaskItem(task, stageIndex, taskIndex);
               }),
-
-            const SizedBox(height: 8),
-
+            const SizedBox(height: 12),
             // Nút thêm công việc
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => _addTask(stageIndex),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Thêm công việc'),
+                icon: const Icon(Icons.add, size: 24),
+                label: const Text('Thêm công việc', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.blue,
-                  side: const BorderSide(color: Colors.blue),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  foregroundColor: Colors.orange,
+                  side: const BorderSide(color: Colors.orange, width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),
@@ -604,12 +630,12 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
 
   Widget _buildTaskItem(Task task, int stageIndex, int taskIndex) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!, width: 1.5),
       ),
       child: Row(
         children: [
@@ -620,18 +646,19 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                 Text(
                   task.taskName,
                   style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   task.suggestedMaterials.isEmpty
                       ? 'Vật tư gợi ý: (không)'
                       : 'Vật tư gợi ý: ${task.suggestedMaterials.map((m) => m.materialName).join(", ")}',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                    fontSize: 16,
+                    color: Colors.grey[700],
                   ),
                 ),
               ],
@@ -641,17 +668,19 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit, size: 20, color: Colors.blue),
+                icon: const Icon(Icons.edit, size: 28, color: Colors.blue),
                 onPressed: () => _editTask(stageIndex, taskIndex),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
+                tooltip: 'Chỉnh sửa',
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               IconButton(
-                icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                icon: const Icon(Icons.close, size: 28, color: Colors.red),
                 onPressed: () => _deleteTask(stageIndex, taskIndex),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
+                tooltip: 'Xóa',
               ),
             ],
           ),

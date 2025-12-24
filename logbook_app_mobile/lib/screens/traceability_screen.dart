@@ -53,9 +53,10 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Kết quả truy xuất nguồn gốc'),
+        title: const Text('Kết quả truy xuất nguồn gốc', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.green[700],
         elevation: 0,
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -97,18 +98,30 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.green[100],
+        color: Colors.green[200],
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
       ),
       child: Center(
-        child: Text(
-          _traceabilityData!.cropType.toUpperCase(),
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.green[800],
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.spa, color: Colors.green, size: 40),
+            const SizedBox(width: 16),
+            Text(
+              _traceabilityData!.cropType.toUpperCase(),
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.green[900],
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -117,61 +130,70 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
   Widget _buildBasicInfo() {
     final data = _traceabilityData!;
     final dateFormat = DateFormat('dd/MM/yyyy');
-
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withOpacity(0.18),
             spreadRadius: 2,
-            blurRadius: 5,
+            blurRadius: 8,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data.seasonName,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.green[800],
-            ),
+          Row(
+            children: [
+              const Icon(Icons.eco, color: Colors.green, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  data.seasonName,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[800],
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildInfoRow('Mã lô & xuất:', data.lotCode, Colors.red[700]!),
-          const SizedBox(height: 8),
+          const SizedBox(height: 18),
+          _buildInfoRow('Mã lô & xuất:', data.lotCode, Colors.red[700]!, fontSize: 18),
+          const SizedBox(height: 10),
           _buildInfoRow(
             'Ngày thu hoạch:',
             data.harvestDate != null
                 ? dateFormat.format(data.harvestDate!)
                 : 'Chưa thu hoạch',
             Colors.black87,
+            fontSize: 18,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           _buildInfoRow(
             'Nơi canh tác:',
             data.farmArea,
             Colors.black87,
+            fontSize: 18,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           Wrap(
-            spacing: 8,
+            spacing: 12,
             children: [
               Chip(
-                label: const Text('VietGAP', style: TextStyle(fontSize: 12)),
+                label: const Text('VietGAP', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 backgroundColor: Colors.green[100],
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               Chip(
-                label: const Text('OCOP 4 sao', style: TextStyle(fontSize: 12)),
+                label: const Text('OCOP 4 sao', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 backgroundColor: Colors.blue[100],
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             ],
           ),
@@ -180,24 +202,25 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, Color valueColor) {
+  Widget _buildInfoRow(String label, String value, Color valueColor, {double fontSize = 16}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: fontSize,
             color: Colors.black54,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Expanded(
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
               color: valueColor,
             ),
           ),
@@ -218,14 +241,20 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              'Chi tiết nhật ký canh tác',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.green[800],
-              ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              children: [
+                const Icon(Icons.menu_book, color: Colors.green, size: 28),
+                const SizedBox(width: 10),
+                Text(
+                  'Chi tiết nhật ký canh tác',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[800],
+                  ),
+                ),
+              ],
             ),
           ),
           ...(_traceabilityData?.stages ?? [])
@@ -271,9 +300,10 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
             child: Text(
               'GIAI ĐOẠN $stageNumber: ${stage.stageName.toUpperCase()}',
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                letterSpacing: 1.1,
               ),
             ),
           ),
@@ -359,16 +389,16 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
                 Text(
                   dateDisplay,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 16,
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   task.taskName,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
                 ),
@@ -380,7 +410,7 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
                         child: Text(
                           'Vật tư: ${material.materialName} (${material.quantity}${material.unit})',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 16,
                             color: Colors.grey[700],
                           ),
                         ),
@@ -396,7 +426,7 @@ class _TraceabilityScreenState extends State<TraceabilityScreen> {
                             ? 'Vật tư: ${material.materialName} (${material.suggestedQuantityUnit})'
                             : 'Vật tư: ${material.materialName}',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 16,
                             color: Colors.grey[600],
                           ),
                         ),

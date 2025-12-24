@@ -363,10 +363,14 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, size: 32),
           onPressed: () => Navigator.pop(context),
+          tooltip: 'Quay lại',
         ),
-        title: const Text('Thêm nhật ký thủ công'),
+        title: const Text('Thêm nhật ký thủ công', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Form(
@@ -375,31 +379,33 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             // CÔNG VIỆC
-            _buildSectionTitle('CÔNG VIỆC'),
-            const SizedBox(height: 12),
+            _buildSectionTitle('CÔNG VIỆC', fontSize: 20),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _taskNameController,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: 'VD: Phun thuốc trừ sâu',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 18),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Colors.blue, width: 2),
                 ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
+                  horizontal: 20,
+                  vertical: 20,
                 ),
+                prefixIcon: const Icon(Icons.assignment, size: 28),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -412,24 +418,25 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
             const SizedBox(height: 24),
 
             // KHU VỰC
-            _buildSectionTitle('KHU VỰC'),
-            const SizedBox(height: 12),
+            _buildSectionTitle('KHU VỰC', fontSize: 20),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _selectedLocation,
                   isExpanded: true,
-                  icon: const Icon(Icons.arrow_drop_down),
+                  icon: const Icon(Icons.arrow_drop_down, size: 28),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                   items: _availableLocations.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value, style: const TextStyle(fontSize: 18)),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -446,26 +453,26 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
             const SizedBox(height: 24),
 
             // THỜI GIAN
-            _buildSectionTitle('THỜI GIAN'),
-            const SizedBox(height: 12),
+            _buildSectionTitle('THỜI GIAN', fontSize: 20),
+            const SizedBox(height: 16),
             InkWell(
               onTap: () => _selectDateTime(context),
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 20),
-                    const SizedBox(width: 12),
+                    Icon(Icons.calendar_today, color: Colors.grey.shade600, size: 28),
+                    const SizedBox(width: 16),
                     Text(
                       '${_selectedDateTime.day.toString().padLeft(2, '0')}/${_selectedDateTime.month.toString().padLeft(2, '0')}/${_selectedDateTime.year} ${_selectedDateTime.hour.toString().padLeft(2, '0')}:${_selectedDateTime.minute.toString().padLeft(2, '0')}',
                       style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -476,8 +483,8 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
             const SizedBox(height: 24),
 
             // VẬT TƯ ĐÃ SỬ DỤNG
-            _buildSectionTitle('VẬT TƯ ĐÃ SỬ DỤNG'),
-            const SizedBox(height: 12),
+            _buildSectionTitle('VẬT TƯ ĐÃ SỬ DỤNG', fontSize: 20),
+            const SizedBox(height: 16),
             
             // Vật tư hay dùng (hiển thị khi chưa chọn gì)
             if (_selectedMaterials.isEmpty)
@@ -740,59 +747,62 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
             const SizedBox(height: 24),
 
             // GHI CHÚ
-            _buildSectionTitle('GHI CHÚ (KHÔNG BẮT BUỘC)'),
-            const SizedBox(height: 12),
+            _buildSectionTitle('GHI CHÚ (KHÔNG BẮT BUỘC)', fontSize: 20),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _notesController,
               maxLines: 4,
+              style: const TextStyle(fontSize: 18),
               decoration: InputDecoration(
                 hintText: 'VD: Bón vào lúc trời rầm mát...',
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Colors.blue, width: 2),
                 ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
-                contentPadding: const EdgeInsets.all(16),
+                contentPadding: const EdgeInsets.all(20),
               ),
             ),
 
             const SizedBox(height: 32),
 
             // Nút Lưu nhật ký
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: _isLoading ? null : _handleSave,
+              icon: const Icon(Icons.save, size: 28),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 22),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 2,
+                textStyle: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-              child: _isLoading
+              label: _isLoading
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: 28,
+                      width: 28,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2,
+                        strokeWidth: 3,
                         color: Colors.white,
                       ),
                     )
                   : const Text(
                       'Lưu nhật ký',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -805,11 +815,11 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, {double fontSize = 16}) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 12,
+      style: TextStyle(
+        fontSize: fontSize,
         fontWeight: FontWeight.bold,
         letterSpacing: 0.5,
         color: Colors.black87,

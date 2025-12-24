@@ -213,325 +213,313 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('HH:mm, dd/MM/yyyy');
-    
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
-        title: const Text('Xác nhận công việc'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Thông tin công việc
-                  _buildInfoCard(dateFormat),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Vật tư đã sử dụng
-                  _buildMaterialsSection(),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Ghi chú
-                  _buildNotesSection(),
-                  
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
+        title: const Text(
+          'XÁC NHẬN CÔNG VIỆC',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          
-          // Nút Lưu nhật ký
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(size: 32, color: Colors.white),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Thông tin công việc
+              Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: _buildInfoCard(dateFormat),
+              ),
+              // Vật tư đã sử dụng
+              Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: _buildMaterialsSection(),
+              ),
+              // Ghi chú
+              Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.only(bottom: 32),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: _buildNotesSection(),
+              ),
+              // Nút lưu nhật ký
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 22),
+                        textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 26,
+                              width: 26,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('LƯU NHẬT KÝ'),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Lưu nhật ký',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
+                ],
               ),
-            ),
+              const SizedBox(height: 18),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildInfoCard(DateFormat dateFormat) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.check_circle_outline, color: Colors.green, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Công việc: ${widget.task.taskName}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.green, size: 36),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'Công việc: ${widget.task.taskName}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.location_on_outlined, color: Colors.grey, size: 18),
-              const SizedBox(width: 8),
-              Text(
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            const Icon(Icons.location_on_outlined, color: Colors.orange, size: 28),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
                 'Khu vực: ${widget.seasonLocation ?? "Chưa xác định"}',
                 style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
+                  fontSize: 20,
+                  color: Colors.orange[800],
+                  fontWeight: FontWeight.w600,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(Icons.access_time, color: Colors.grey, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Thời gian: ${dateFormat.format(DateTime.now())}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
-                ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            const Icon(Icons.access_time, color: Colors.blue, size: 28),
+            const SizedBox(width: 16),
+            Text(
+              'Thời gian: ${dateFormat.format(DateTime.now())}',
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.blue,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
   Widget _buildMaterialsSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'VẬT TƯ ĐÃ SỬ DỤNG',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.orange,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 18),
+        if (_selectedMaterials.isNotEmpty) ...[
+          const Text(
+            'Danh sách vật tư:',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ..._selectedMaterials.map((materialName) =>
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6.0),
+              child: _buildMaterialCheckbox(materialName, false),
+            ),
+          ),
+          const SizedBox(height: 18),
+        ],
+        // Thêm vật tư khác
+        const Text(
+          'Thêm vật tư khác',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            _buildQuickAddButton('+ Phân đạm'),
+            _buildQuickAddButton('+ Kali'),
+            _buildQuickAddButton('+ Thuốc trừ sâu A'),
+          ],
+        ),
+        const SizedBox(height: 14),
+        // Tìm kiếm
+        const Text(
+          'Tìm kiếm vật tư:',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Nhập tên vật tư...',
+            hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+            prefixIcon: const Icon(Icons.search, size: 22, color: Colors.grey),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.blue),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          ),
+          style: const TextStyle(fontSize: 15),
+          onChanged: _searchMaterials,
+        ),
+        if (_searchResults.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                final materialName = _searchResults[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(materialName, style: const TextStyle(fontSize: 15)),
+                  trailing: Icon(
+                    _selectedMaterials.contains(materialName)
+                        ? Icons.check_circle
+                        : Icons.add_circle_outline,
+                    color: _selectedMaterials.contains(materialName)
+                        ? Colors.green
+                        : Colors.grey,
+                  ),
+                  onTap: () {
+                    _toggleMaterial(materialName);
+                    _searchController.clear();
+                    setState(() => _searchResults = []);
+                  },
+                );
+              },
+            ),
           ),
         ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'VẬT TƯ ĐÃ SỬ DỤNG',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-              letterSpacing: 0.5,
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Hiển thị vật tư đã chọn (từ usedMaterials hoặc suggestedMaterials)
-          if (_selectedMaterials.isNotEmpty) ...[
-            const Text(
-              'Vật tư đã sử dụng:',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.black87,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ..._selectedMaterials.map((materialName) =>
-              _buildMaterialCheckbox(materialName, false),
-            ),
-            const SizedBox(height: 16),
-          ],
-          
-          // Thêm vật tư khác
-          const Text(
-            'Thêm vật tư khác',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Vật tư hay dùng:',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 8),
-          
-          // Nút vật tư hay dùng (hardcode)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildQuickAddButton('+ Phân đạm'),
-              _buildQuickAddButton('+ Kali'),
-              _buildQuickAddButton('+ Thuốc trừ sâu A'),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Tìm kiếm
-          const Text(
-            'Tìm kiếm:',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Nhập tên vật tư...',
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              prefixIcon: const Icon(Icons.search, size: 20, color: Colors.grey),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.blue),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            style: const TextStyle(fontSize: 14),
-            onChanged: _searchMaterials,
-          ),
-          
-          // Kết quả tìm kiếm
-          if (_searchResults.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 150),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: _searchResults.length,
-                itemBuilder: (context, index) {
-                  final materialName = _searchResults[index];
-                  return ListTile(
-                    dense: true,
-                    title: Text(materialName, style: const TextStyle(fontSize: 14)),
-                    trailing: Icon(
-                      _selectedMaterials.contains(materialName) 
-                          ? Icons.check_circle 
-                          : Icons.add_circle_outline,
-                      color: _selectedMaterials.contains(materialName)
-                          ? Colors.green
-                          : Colors.grey,
-                    ),
-                    onTap: () {
-                      _toggleMaterial(materialName);
-                      _searchController.clear();
-                      setState(() => _searchResults = []);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-          
-          const SizedBox(height: 16),
-          
-          // Phương án 3: Quét mã vạch/QR
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _scanQRCode,
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Quét mã vạch / QR'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blue,
-                side: const BorderSide(color: Colors.blue),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+        const SizedBox(height: 14),
+        // Quét mã vạch/QR
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _scanQRCode,
+            icon: const Icon(Icons.qr_code_scanner, size: 24),
+            label: const Text('Quét mã vạch / QR', style: TextStyle(fontSize: 17)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.blue,
+              side: const BorderSide(color: Colors.blue, width: 2),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
-          
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -539,7 +527,6 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
     final isChecked = _selectedMaterials.contains(materialName);
     final controller = _quantityControllers[materialName];
     final unit = _unitControllers[materialName] ?? 'kg';
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -548,35 +535,37 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
           onChanged: (value) => _toggleMaterial(materialName),
           title: Text(
             materialName,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
           ),
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          dense: true,
+          dense: false,
+          activeColor: Colors.green,
+          checkColor: Colors.white,
         ),
         if (isChecked && controller != null) ...[
           Padding(
-            padding: const EdgeInsets.only(left: 40, bottom: 8),
+            padding: const EdgeInsets.only(left: 44, bottom: 10),
             child: Row(
               children: [
                 const Text(
                   'Số lượng',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 15,
                     color: Colors.black87,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
-                  width: 120,
+                  width: 110,
                   child: TextField(
                     controller: controller,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: 'VD: 10',
                       hintStyle: TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         color: Colors.grey[400],
                       ),
                       border: OutlineInputBorder(
@@ -592,18 +581,18 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
                         borderSide: const BorderSide(color: Colors.blue, width: 2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
+                        horizontal: 10,
+                        vertical: 10,
                       ),
                     ),
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 15),
                   ),
                 ),
                 const SizedBox(width: 12),
                 // Dropdown chọn đơn vị
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 38,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.grey[300]!),
@@ -613,11 +602,11 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
                     value: unit,
                     underline: const SizedBox(),
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 15,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.grey[600], size: 20),
+                    icon: Icon(Icons.arrow_drop_down, color: Colors.grey[600], size: 18),
                     items: const [
                       DropdownMenuItem(value: 'kg', child: Text('kg')),
                       DropdownMenuItem(value: 'g', child: Text('g')),
@@ -640,56 +629,42 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
   }
 
   Widget _buildNotesSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'GHI CHÚ (KHÔNG BẮT BUỘC)',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepOrange,
+            letterSpacing: 0.8,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'GHI CHÚ (KHÔNG BẮT BUỘC)',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-              letterSpacing: 0.5,
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: _notesController,
+          decoration: InputDecoration(
+            hintText: 'Ví dụ: Bón vào lúc trời rầm mát...',
+            hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _notesController,
-            decoration: InputDecoration(
-              hintText: 'Ví dụ: Bón vào lúc trời rầm mát...',
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.blue),
-              ),
-              contentPadding: const EdgeInsets.all(12),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
-            style: const TextStyle(fontSize: 14),
-            maxLines: 3,
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.blue, width: 2),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
           ),
-        ],
-      ),
+          style: const TextStyle(fontSize: 15, color: Colors.black, fontWeight: FontWeight.w500),
+          maxLines: 4,
+        ),
+      ],
     );
   }
 

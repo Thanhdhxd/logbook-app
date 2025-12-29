@@ -157,21 +157,24 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
 
     console.log(`📦 Sau khi gộp: ${manualLogsMap.size} tasks unique`);
 
-    // Bước 4.2: Lọc bỏ tasks đã ẩn (CHỈ ẨN nếu log MỚI NHẤT được tạo TRƯỚC khi bỏ qua)
+    // Bước 4.2: Lọc bỏ tasks đã ẩn (CHỈ HIỂN THỊ nếu log được tạo SAU khi ẩn)
     const finalManualLogs = new Map();
     manualLogsMap.forEach((log, taskName) => {
         if (hiddenTaskNames.has(taskName)) {
             // Tìm thời gian ẩn task
             const hiddenTask = hiddenTasks.find(ht => ht.taskName === taskName);
             const hiddenDate = hiddenTask ? new Date(hiddenTask.hiddenDate) : null;
-            const logDate = new Date(log.completedAt);
             
-            // Nếu log MỚI NHẤT được tạo SAU khi ẩn → Vẫn hiển thị (user tạo lại task)
-            if (hiddenDate && logDate > hiddenDate) {
-                console.log(`  ✅ Task "${taskName}" được tạo SAU khi bỏ qua (${logDate.toISOString()} > ${hiddenDate.toISOString()}) → Hiển thị`);
+            // QUAN TRỌNG: Dùng _id.getTimestamp() để lấy thời gian tạo document THẬT
+            // Đây là thời gian server tạo record, không thể giả mạo
+            const logCreatedAt = log._id.getTimestamp();
+            
+            // Chỉ hiển thị nếu log được TẠO SAU khi ẩn
+            if (hiddenDate && logCreatedAt > hiddenDate) {
+                console.log(`  ✅ Task "${taskName}" được tạo SAU khi ẩn (${logCreatedAt.toISOString()} > ${hiddenDate.toISOString()}) → Hiển thị`);
                 finalManualLogs.set(taskName, log);
             } else {
-                console.log(`  ⏭️ Task "${taskName}" được tạo TRƯỚC khi bỏ qua → Ẩn`);
+                console.log(`  ⏭️ Task "${taskName}" được tạo TRƯỚC khi ẩn (${logCreatedAt.toISOString()} <= ${hiddenDate.toISOString()}) → Ẩn`);
             }
         } else {
             // Task chưa bị ẩn bao giờ → Hiển thị

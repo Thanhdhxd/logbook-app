@@ -94,12 +94,36 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
     let dailyTasks = [];
     let currentStage = null;
 
-    // ✅ KHÔNG TỰ ĐỘNG LẤY TASKS TỪ TEMPLATE
-    // Phần "Công việc hôm nay" là cho người dùng tự tạo công việc thủ công
-    console.log('📝 Công việc hôm nay - Chỉ hiển thị nhật ký thủ công');
+    console.log('\n📋 Lấy công việc hôm nay:');
+    console.log('  - Ngày thứ:', currentDay);
+    console.log('  - Season ID:', seasonId);
+    console.log('  - Season ObjectId:', seasonObjectId);
 
-    // Lấy manual logs (nhật ký thủ công) gần đây
-    // Lấy tất cả manual logs trong 30 ngày gần nhất
+    // 🔒 Bước 1: Lấy danh sách tasks đã bị ẩn (bỏ qua)
+    const hiddenTasks = await HiddenTask.find({
+        season: seasonObjectId
+    }).select('taskName reason hiddenDate');
+    
+    console.log('🔍 HiddenTasks query result:', hiddenTasks);
+    
+    const hiddenTaskNames = new Set(hiddenTasks.map(ht => ht.taskName));
+    console.log('🚫 Tasks đã ẩn (count):', hiddenTaskNames.size);
+    console.log('🚫 Tasks đã ẩn (list):', Array.from(hiddenTaskNames));
+
+    // 🔒 Bước 2: Lấy danh sách tasks đã hoàn thành
+    const completedLogs = await LogEntry.find({
+        season: seasonObjectId,
+        status: 'DONE'
+    }).select('taskName');
+    
+    const completedTaskNames = new Set(completedLogs.map(log => log.taskName));
+    console.log('✅ Tasks đã hoàn thành:', Array.from(completedTaskNames));
+
+    // ❌ BỎ QUA: Không lấy tasks từ template nữa
+    // Người dùng sẽ tự tạo nhật ký thủ công
+    console.log('📝 Chế độ: Chỉ hiển thị nhật ký thủ công, không lấy từ kế hoạch');
+
+    // 📝 Bước 3: Lấy manual logs (tasks tự tạo) gần đây
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -113,13 +137,13 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
         }
     }).select('taskName notes usedMaterials completedAt location').sort({ completedAt: -1 });
     
-    console.log('🔍 Manual Logs Query:');
-    console.log('  - Found manual logs:', manualLogs.length);
+    console.log(`\n📝 Tìm thấy ${manualLogs.length} manual logs gần đây`);
 
-    // Gộp manual logs theo taskName (để tránh trùng lặp)
+    // Bước 4.1: Gộp manual logs theo taskName (lấy log MỚI NHẤT của mỗi task)
     const manualLogsMap = new Map();
     manualLogs.forEach(log => {
         const taskName = log.taskName;
+        
         if (!manualLogsMap.has(taskName)) {
             manualLogsMap.set(taskName, log);
         } else {
@@ -131,8 +155,33 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
         }
     });
 
-    // CHỈ hiển thị manual logs (công việc tự tạo)
+    console.log(`📦 Sau khi gộp: ${manualLogsMap.size} tasks unique`);
+
+    // Bước 4.2: Lọc bỏ tasks đã ẩn (CHỈ ẨN nếu log MỚI NHẤT được tạo TRƯỚC khi bỏ qua)
+    const finalManualLogs = new Map();
     manualLogsMap.forEach((log, taskName) => {
+        if (hiddenTaskNames.has(taskName)) {
+            // Tìm thời gian ẩn task
+            const hiddenTask = hiddenTasks.find(ht => ht.taskName === taskName);
+            const hiddenDate = hiddenTask ? new Date(hiddenTask.hiddenDate) : null;
+            const logDate = new Date(log.completedAt);
+            
+            // Nếu log MỚI NHẤT được tạo SAU khi ẩn → Vẫn hiển thị (user tạo lại task)
+            if (hiddenDate && logDate > hiddenDate) {
+                console.log(`  ✅ Task "${taskName}" được tạo SAU khi bỏ qua (${logDate.toISOString()} > ${hiddenDate.toISOString()}) → Hiển thị`);
+                finalManualLogs.set(taskName, log);
+            } else {
+                console.log(`  ⏭️ Task "${taskName}" được tạo TRƯỚC khi bỏ qua → Ẩn`);
+            }
+        } else {
+            // Task chưa bị ẩn bao giờ → Hiển thị
+            console.log(`  ✅ Task "${taskName}" chưa bị ẩn → Hiển thị`);
+            finalManualLogs.set(taskName, log);
+        }
+    });
+
+    // Thêm manual logs vào danh sách tasks
+    finalManualLogs.forEach((log, taskName) => {
         dailyTasks.push({
             taskId: log._id.toString(),
             taskName: log.taskName,
@@ -145,6 +194,8 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
             completedAt: log.completedAt ? log.completedAt.toISOString() : null
         });
     });
+
+    console.log(`\n📊 TỔNG KẾT CUỐI CÙNG: ${dailyTasks.length} tasks (tất cả đều là manual logs)`);
 
     return successResponse(res, {
         currentDay,
@@ -178,17 +229,19 @@ router.get('/user', asyncHandler(async (req, res) => {
 router.post('/hide-task', asyncHandler(async (req, res) => {
     const { seasonId, taskName, reason } = req.body;
     
-    // Lấy user đầu tiên
-    const User = require('../models/User');
-    const user = await User.findOne();
-    const userId = user ? user._id : null;
+    console.log('\n🚫 POST /hide-task');
+    console.log('  - seasonId:', seasonId);
+    console.log('  - taskName:', taskName);
+    console.log('  - reason:', reason);
 
     // Validation
     if (!seasonId || !taskName || !reason) {
+        console.log('❌ Thiếu thông tin bắt buộc');
         return errorResponse(res, 'Thiếu thông tin bắt buộc', 400);
     }
 
     if (!['DONE', 'SKIPPED'].includes(reason)) {
+        console.log('❌ Lý do không hợp lệ:', reason);
         return errorResponse(res, 'Lý do không hợp lệ', 400);
     }
 
@@ -197,37 +250,38 @@ router.post('/hide-task', asyncHandler(async (req, res) => {
         ? new mongoose.Types.ObjectId(seasonId) 
         : seasonId;
 
-    // Kiểm tra xem đã tồn tại chưa
-    const existing = await HiddenTask.findOne({
-        season: seasonObjectId,
-        taskName: taskName
-    });
+    // ✅ Sử dụng findOneAndUpdate với upsert để tránh duplicate
+    try {
+        const hiddenTask = await HiddenTask.findOneAndUpdate(
+            {
+                season: seasonObjectId,
+                taskName: taskName
+            },
+            {
+                season: seasonObjectId,
+                taskName: taskName,
+                reason: reason,
+                hiddenDate: new Date()
+            },
+            {
+                upsert: true,  // Tạo mới nếu chưa tồn tại
+                new: true,     // Trả về document sau khi update
+                setDefaultsOnInsert: true
+            }
+        );
 
-    if (existing) {
+        console.log('✅ Đã ẩn task thành công:', hiddenTask._id);
+
         return successResponse(
             res,
-            { hidden: true },
-            'Task đã được ẩn trước đó',
-            200
+            { hidden: true, hiddenTaskId: hiddenTask._id },
+            'Đã ẩn task thành công',
+            201
         );
+    } catch (error) {
+        console.error('❌ Lỗi khi ẩn task:', error);
+        return errorResponse(res, 'Lỗi khi ẩn task: ' + error.message, 500);
     }
-
-    // Tạo mới
-    const hiddenTask = new HiddenTask({
-        season: seasonObjectId,
-        taskName: taskName,
-        user: userId,
-        reason: reason
-    });
-
-    await hiddenTask.save();
-
-    return successResponse(
-        res,
-        { hidden: true },
-        'Đã ẩn task thành công',
-        201
-    );
 }));
 
 /**

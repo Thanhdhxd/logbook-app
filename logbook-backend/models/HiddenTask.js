@@ -11,7 +11,7 @@ const HiddenTaskSchema = new mongoose.Schema({
     user: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User', 
-        required: true 
+        required: false  // ✅ Không bắt buộc để tránh lỗi khi không có user
     },
     hiddenDate: { type: Date, default: Date.now },
     reason: { 
@@ -21,7 +21,7 @@ const HiddenTaskSchema = new mongoose.Schema({
     }
 });
 
-// Index để tìm kiếm nhanh
-HiddenTaskSchema.index({ season: 1, user: 1, taskName: 1 });
+// ✅ UNIQUE index để tránh duplicate (1 task chỉ ẩn 1 lần)
+HiddenTaskSchema.index({ season: 1, taskName: 1 }, { unique: true });
 
 module.exports = mongoose.model('HiddenTask', HiddenTaskSchema);

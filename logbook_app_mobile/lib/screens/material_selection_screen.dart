@@ -36,7 +36,7 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
   bool _isLoading = false;
   bool _isSaving = false; // Guard để tránh double submit
   DateTime _selectedDateTime = DateTime.now();
-  String _selectedLocation = '';
+  String? _selectedLocation; // Đổi thành nullable
   
   final List<String> _availableLocations = [
     'Thửa ruộng A',
@@ -52,7 +52,7 @@ class _MaterialSelectionScreenState extends State<MaterialSelectionScreen> {
     final seasonLoc = widget.seasonLocation ?? 'Thửa ruộng A';
     _selectedLocation = _availableLocations.contains(seasonLoc) 
         ? seasonLoc 
-        : 'Thửa ruộng A';
+        : _availableLocations.first; // Đảm bảo luôn chọn item hợp lệ
     
     // Nếu có task từ kế hoạch, fill dữ liệu
     if (widget.task != null) {

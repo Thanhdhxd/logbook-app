@@ -217,7 +217,7 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
         title: const Text(
-          'XÁC NHẬN CÔNG VIỆC',
+          'Xác Nhận Công Việc',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -312,7 +312,7 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('LƯU NHẬT KÝ'),
+                          : const Text('Lưu Nhật Ký'),
                     ),
                   ),
                 ],

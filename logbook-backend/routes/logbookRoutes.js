@@ -51,8 +51,45 @@ router.post('/', asyncHandler(async (req, res) => {
         season: savedLog.season,
         taskName: savedLog.taskName,
         logType: savedLog.logType,
+        status: savedLog.status,
         completedAt: savedLog.completedAt
     });
+    
+    // ✅ CHỈ ẩn task khi XÁC NHẬN từ UI (scheduled), KHÔNG ẩn khi TẠO THỦ CÔNG (manual)
+    if (status === 'DONE' && logType === 'scheduled') {
+        const HiddenTask = require('../models/HiddenTask');
+        const mongoose = require('mongoose');
+        
+        const seasonObjectId = mongoose.Types.ObjectId.isValid(season) 
+            ? new mongoose.Types.ObjectId(season) 
+            : season;
+        
+        try {
+            await HiddenTask.findOneAndUpdate(
+                {
+                    season: seasonObjectId,
+                    taskName: taskName
+                },
+                {
+                    season: seasonObjectId,
+                    taskName: taskName,
+                    reason: 'DONE',
+                    hiddenDate: new Date()
+                },
+                {
+                    upsert: true,
+                    new: true,
+                    setDefaultsOnInsert: true
+                }
+            );
+            console.log(`✅ Đã ẩn task "${taskName}" sau khi xác nhận từ UI`);
+        } catch (error) {
+            console.error('⚠️ Lỗi khi ẩn task:', error);
+            // Không throw error, vì log đã lưu thành công
+        }
+    } else if (logType === 'manual') {
+        console.log(`📝 Task thủ công "${taskName}" được tạo - KHÔNG tự động ẩn`);
+    }
     
     // Track material usage for favorites
     if (usedMaterials && usedMaterials.length > 0 && userId) {

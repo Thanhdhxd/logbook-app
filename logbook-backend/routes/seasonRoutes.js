@@ -196,7 +196,6 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
         currentStage,
         farmArea: season.farmArea,
         tasks: dailyTasks
-    });
     }, `Công việc cần làm cho Ngày ${currentDay} của mùa vụ`);
 }));
 

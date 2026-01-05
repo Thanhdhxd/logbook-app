@@ -61,5 +61,7 @@ const LogEntrySchema = new mongoose.Schema({
 
 // Thiết lập index để tìm kiếm nhanh theo Mùa vụ và Công việc
 LogEntrySchema.index({ season: 1, taskName: 1, logDate: 1 });
+LogEntrySchema.index({ season: 1, logType: 1, completedAt: -1 }); // Tối ưu cho manual logs query
+LogEntrySchema.index({ season: 1, status: 1, completedAt: -1 }); // Tối ưu cho completed logs query
 
 module.exports = mongoose.model('LogEntry', LogEntrySchema);

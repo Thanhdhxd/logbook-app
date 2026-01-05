@@ -29,6 +29,9 @@ const blockchainRoutes = require('./routes/blockchainRoutes');
 // Import scheduler
 const { startScheduler } = require('./scheduler/taskScheduler');
 
+// Import keep-alive utility
+const { startKeepAlive } = require('./utils/keepAlive');
+
 // Import constants
 const { PORT, DB_NAME } = require('./config/constants');
 
@@ -70,6 +73,9 @@ app.use(errorHandler);
 
 // *** Khởi động Scheduler ***
 startScheduler();
+
+// *** Khởi động Keep-Alive ***
+startKeepAlive();
 
 // *** Khởi động Server ***
 app.listen(PORT, () => {

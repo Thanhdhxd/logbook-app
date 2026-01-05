@@ -102,42 +102,35 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
     // 🔒 Bước 1: Lấy danh sách tasks đã bị ẩn (bỏ qua)
     const hiddenTasks = await HiddenTask.find({
         season: seasonObjectId
-    }).select('taskName reason hiddenDate');
-    
-    console.log('🔍 HiddenTasks query result:', hiddenTasks);
+    }).select('taskName reason hiddenDate').lean();
     
     const hiddenTaskNames = new Set(hiddenTasks.map(ht => ht.taskName));
-    console.log('🚫 Tasks đã ẩn (count):', hiddenTaskNames.size);
-    console.log('🚫 Tasks đã ẩn (list):', Array.from(hiddenTaskNames));
 
-    // 🔒 Bước 2: Lấy danh sách tasks đã hoàn thành
+    // 🔒 Bước 2: Lấy danh sách tasks đã hoàn thành (chỉ lấy trong 7 ngày gần đây)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
     const completedLogs = await LogEntry.find({
         season: seasonObjectId,
-        status: 'DONE'
-    }).select('taskName');
+        status: 'DONE',
+        completedAt: { $gte: sevenDaysAgo }
+    }).select('taskName').lean();
     
     const completedTaskNames = new Set(completedLogs.map(log => log.taskName));
-    console.log('✅ Tasks đã hoàn thành:', Array.from(completedTaskNames));
 
     // ❌ BỎ QUA: Không lấy tasks từ template nữa
     // Người dùng sẽ tự tạo nhật ký thủ công
-    console.log('📝 Chế độ: Chỉ hiển thị nhật ký thủ công, không lấy từ kế hoạch');
 
-    // 📝 Bước 3: Lấy manual logs (tasks tự tạo) gần đây
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+    // 📝 Bước 3: Lấy manual logs (tasks tự tạo) gần đây - CHỈ 7 NGÀY
     const manualLogs = await LogEntry.find({
         season: seasonObjectId,
         logType: 'manual',
         completedAt: {
             $exists: true,
             $ne: null,
-            $gte: thirtyDaysAgo
+            $gte: sevenDaysAgo
         }
-    }).select('taskName notes usedMaterials completedAt location').sort({ completedAt: -1 });
-    
-    console.log(`\n📝 Tìm thấy ${manualLogs.length} manual logs gần đây`);
+    }).select('taskName notes usedMaterials completedAt location').sort({ completedAt: -1 }).lean();
 
     // Bước 4.1: Gộp manual logs theo taskName (lấy log MỚI NHẤT của mỗi task)
     const manualLogsMap = new Map();
@@ -198,13 +191,12 @@ router.get('/daily/:seasonId', asyncHandler(async (req, res) => {
         });
     });
 
-    console.log(`\n📊 TỔNG KẾT CUỐI CÙNG: ${dailyTasks.length} tasks (tất cả đều là manual logs)`);
-
     return successResponse(res, {
         currentDay,
         currentStage,
         farmArea: season.farmArea,
         tasks: dailyTasks
+    });
     }, `Công việc cần làm cho Ngày ${currentDay} của mùa vụ`);
 }));
 

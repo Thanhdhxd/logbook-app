@@ -46,6 +46,7 @@ dependencies:
   flutter_slidable: ^3.0.0  # Vuốt để xác nhận/bỏ qua
   # Lưu trữ local
   shared_preferences: ^2.2.2 # Lưu token và thông tin user
+  shared_preferences_web: ^2.2.1 # Support cho web platform
 
 dev_dependencies:
   flutter_test:

@@ -46,5 +46,5 @@ Xem chi tiết trong `/models`
 
 ## License
 MIT
-flutter build web --release
-firebase deploy --only hosting
+## flutter build web --release
+## firebase deploy --only hosting

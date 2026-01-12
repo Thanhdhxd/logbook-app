@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../models/daily_task.dart';
 import '../services/task_service.dart';
 import '../services/material_service.dart';
+import '../utils/snackbar_helper.dart';
 
 /// Màn hình xác nhận nhanh cho scheduled tasks
 class QuickConfirmScreen extends StatefulWidget {
@@ -145,12 +146,9 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
         }
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã thêm: $result'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
+      SnackbarHelper.showSuccess(
+        context,
+        'Đã thêm: $result',
       );
     }
   }
@@ -192,20 +190,11 @@ class _QuickConfirmScreenState extends State<QuickConfirmScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✓ Đã xác nhận công việc'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
       Navigator.pop(context, true);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lỗi khi xác nhận'),
-          backgroundColor: Colors.red,
-        ),
+      SnackbarHelper.showError(
+        context,
+        'Lỗi khi xác nhận',
       );
     }
   }

@@ -3,6 +3,7 @@ import '../models/season.dart';
 import '../models/daily_task.dart';
 import '../services/task_service.dart';
 import '../services/season_service.dart';
+import '../utils/snackbar_helper.dart';
 import 'material_selection_screen.dart';
 import 'quick_confirm_screen.dart';
 import 'traceability_screen.dart';
@@ -73,10 +74,11 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
     );
     
     if (result == true && mounted) {
-      // Xóa task khỏi danh sách sau khi lưu thành công
-      setState(() {
-        _tasks.removeWhere((t) => t.taskId == task.taskId);
-      });
+      // Hiện thông báo thành công
+      SnackbarHelper.showSuccess(context, '✓ Đã xác nhận công việc thành công');
+      
+      // Reload tasks từ server để cập nhật danh sách
+      await _loadTasks();
     }
   }
 
@@ -98,19 +100,14 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
         _tasks.removeWhere((t) => t.taskId == task.taskId);
       });
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã bỏ qua công việc này'),
-          duration: Duration(seconds: 2),
-        ),
+      SnackbarHelper.showInfo(
+        context,
+        'Đã bỏ qua công việc này',
       );
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lỗi khi bỏ qua công việc'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
+      SnackbarHelper.showError(
+        context,
+        'Lỗi khi bỏ qua công việc',
       );
     }
   }
@@ -175,21 +172,17 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
       try {
         await _seasonService.deleteSeason(widget.season.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✓ Đã xóa mùa vụ thành công'),
-              backgroundColor: Colors.green,
-            ),
+          SnackbarHelper.showSuccess(
+            context,
+            '✓ Đã xóa mùa vụ thành công',
           );
           Navigator.pop(context, true); // Quay về màn hình danh sách
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi: $e'),
-              backgroundColor: Colors.red,
-            ),
+          SnackbarHelper.showError(
+            context,
+            'Lỗi: $e',
           );
         }
       }
@@ -461,7 +454,7 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 18),
                                       child: Text(
-                                        'Mùa vụ này chưa có kế hoạch canh tác.\nTạo nhật ký thủ công hoặc thêm kế hoạch.',
+                                        'Mùa vụ này chưa có kế hoạch canh tác.\nVui lòng thêm kế hoạch để bắt đầu.',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
                                       ),
@@ -474,31 +467,6 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                                           style: const TextStyle(color: Colors.grey, fontSize: 14),
                                         ),
                                       ),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MaterialSelectionScreen(
-                                              seasonId: widget.season.id,
-                                              seasonLocation: widget.season.farmArea,
-                                            ),
-                                          ),
-                                        ).then((value) {
-                                          if (value == true) _loadTasks();
-                                        });
-                                      },
-                                      icon: const Icon(Icons.add, size: 26),
-                                      label: const Text('Tạo nhật ký thủ công', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.shade700,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -712,12 +680,9 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                           if (result == true && mounted) {
                             // Reload danh sách công việc để hiển thị nhật ký mới
                             _loadTasks();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('✓ Đã thêm nhật ký thành công'),
-                                backgroundColor: Colors.green,
-                                duration: Duration(seconds: 2),
-                              ),
+                            SnackbarHelper.showSuccess(
+                              context,
+                              '✓ Đã thêm nhật ký thành công',
                             );
                           }
                         },

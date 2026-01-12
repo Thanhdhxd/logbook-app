@@ -2,12 +2,18 @@
 import 'package:flutter/material.dart';
 import '../models/season.dart';
 import '../services/season_service.dart';
+import '../services/auth_service.dart';
+import '../utils/storage_helper.dart';
+import '../utils/snackbar_helper.dart';
 import 'daily_task_screen.dart';
 import 'create_season_screen.dart';
 import 'season_detail_screen.dart';
+import 'login_screen.dart';
 
 class SeasonSelectionScreen extends StatefulWidget {
-  const SeasonSelectionScreen({super.key});
+  final bool showWelcomeMessage;
+  
+  const SeasonSelectionScreen({super.key, this.showWelcomeMessage = false});
 
   @override
   State<SeasonSelectionScreen> createState() => _SeasonSelectionScreenState();
@@ -23,6 +29,18 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
   void initState() {
     super.initState();
     _loadSeasons();
+    
+    // Hiển thị thông báo đăng nhập thành công nếu có
+    if (widget.showWelcomeMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          SnackbarHelper.showSuccess(
+            context,
+            'Đăng nhập thành công',
+          );
+        }
+      });
+    }
   }
 
   Future<void> _loadSeasons() async {
@@ -61,6 +79,38 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
             onPressed: _loadSeasons,
             tooltip: 'Làm mới',
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle, size: 30),
+            onSelected: (value) async {
+              if (value == 'logout') {
+                _handleLogout();
+              } else if (value == 'profile') {
+                _showUserProfile();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text('Thông tin tài khoản'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Đăng xuất'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: _buildBody(),
@@ -79,28 +129,9 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
             if (result != null && mounted) {
               await _loadSeasons();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
-                      children: [
-                        const Icon(Icons.check_circle, color: Colors.white, size: 28),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Tạo mùa vụ "${result.seasonName}" thành công! 🎉',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                    backgroundColor: Colors.green,
-                    duration: const Duration(seconds: 3),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    margin: const EdgeInsets.all(16),
-                  ),
+                SnackbarHelper.showSuccess(
+                  context,
+                  'Tạo mùa vụ "${result.seasonName}" thành công! 🎉',
                 );
               }
             }
@@ -231,5 +262,97 @@ class _SeasonSelectionScreenState extends State<SeasonSelectionScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  // Xử lý đăng xuất
+  Future<void> _handleLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận đăng xuất'),
+        content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await AuthService.logout();
+      
+      if (!mounted) return;
+      
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
+
+  // Hiển thị thông tin user
+  Future<void> _showUserProfile() async {
+    final userInfo = await StorageHelper.getUserInfo();
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.account_circle, color: Colors.green, size: 32),
+            SizedBox(width: 8),
+            Text('Thông tin tài khoản'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow('Tên:', userInfo['userName'] ?? 'N/A'),
+            const SizedBox(height: 12),
+            _buildInfoRow('Email:', userInfo['userEmail'] ?? 'N/A'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 60,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(color: Colors.black54),
+          ),
+        ),
+      ],
+    );
   }
 }

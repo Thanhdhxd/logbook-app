@@ -1,7 +1,7 @@
 // lib/constants.dart
 class AppConstants {
   // Đổi thành URL backend production khi deploy
-  // Development: http://127.0.0.1:5000/api
+  // Development: http://localhost:3000/api
   // Production: https://logbook-backend-pxuq.onrender.com/api
   static const String baseUrl = 'https://logbook-backend-pxuq.onrender.com/api';
   

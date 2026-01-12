@@ -44,6 +44,8 @@ dependencies:
   mobile_scanner: ^4.0.0    # Thư viện quét mã vạch/QR
   # Swipe gesture
   flutter_slidable: ^3.0.0  # Vuốt để xác nhận/bỏ qua
+  # Lưu trữ local
+  shared_preferences: ^2.2.2 # Lưu token và thông tin user
 
 dev_dependencies:
   flutter_test:

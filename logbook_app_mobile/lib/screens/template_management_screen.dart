@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/plan_template.dart';
 import '../services/template_service.dart';
+import '../utils/snackbar_helper.dart';
 import 'create_template_screen.dart';
 import 'template_detail_screen.dart';
 
@@ -69,21 +70,17 @@ class _TemplateManagementScreenState extends State<TemplateManagementScreen> {
       try {
         await _templateService.deleteTemplate(template.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã xóa kế hoạch thành công'),
-              backgroundColor: Colors.green,
-            ),
+          SnackbarHelper.showSuccess(
+            context,
+            'Đã xóa kế hoạch thành công',
           );
           _loadTemplates();
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi khi xóa: $e'),
-              backgroundColor: Colors.red,
-            ),
+          SnackbarHelper.showError(
+            context,
+            'Lỗi khi xóa: $e',
           );
         }
       }

@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URI")
+}
+
+// ============================================
+// 1. User Model
+// ============================================
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  password  String
+  fcmToken  String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  farmSeasons     FarmSeason[]
+  logEntries      LogEntry[]
+  planTemplates   PlanTemplate[]
+  materialUsages  MaterialUsage[]
+  hiddenTasks     HiddenTask[]
+
+  @@map("users")
+}
+
+// ============================================
+// 2. FarmSeason Model
+// ============================================
+model FarmSeason {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  seasonName     String
+  farmArea       String
+  startDate      DateTime
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  
+  // Foreign Keys
+  userId         String   @db.ObjectId
+  planTemplateId String?  @db.ObjectId
+
+  // Relations
+  user           User          @relation(fields: [userId], references: [id])
+  planTemplate   PlanTemplate? @relation(fields: [planTemplateId], references: [id])
+  logEntries     LogEntry[]
+  hiddenTasks    HiddenTask[]
+
+  @@map("farmseasons")
+}
+
+// ============================================
+// 3. LogEntry Model
+// ============================================
+model LogEntry {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  taskName      String
+  logDate       DateTime        @default(now())
+  status        LogStatus       // DONE, SKIPPED, MANUAL
+  logType       LogType         @default(scheduled) // scheduled, manual
+  notes         String?
+  location      String?
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  
+  // Embedded array
+  usedMaterials UsedMaterial[]
+  
+  // Foreign Keys
+  seasonId      String          @db.ObjectId
+  userId        String          @db.ObjectId
+
+  // Relations
+  season        FarmSeason      @relation(fields: [seasonId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+
+  @@map("logentries")
+}
+
+// Embedded Type for UsedMaterial
+type UsedMaterial {
+  materialName String
+  quantity     Float
+  unit         String  @default("kg")
+  barcode      String?
+}
+
+enum LogStatus {
+  DONE
+  SKIPPED
+  MANUAL
+}
+
+enum LogType {
+  scheduled
+  manual
+}
+
+// ============================================
+// 4. Material Model
+// ============================================
+model Material {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  materialName  String       @unique
+  type          MaterialType // FERTILIZER, PESTICIDE, OTHER
+  supplier      String?
+  barcodeNumber String?      @unique
+  description   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+
+  @@map("materials")
+}
+
+enum MaterialType {
+  FERTILIZER
+  PESTICIDE
+  OTHER
+}
+
+// ============================================
+// 5. PlanTemplate Model
+// ============================================
+model PlanTemplate {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  templateName String   @unique
+  cropType     String
+  durationDays Int?
+  createdAt    DateTime @default(now())
+  
+  // Embedded array
+  stages       Stage[]
+  
+  // Foreign Key
+  createdById  String?  @db.ObjectId
+
+  // Relations
+  createdBy    User?        @relation(fields: [createdById], references: [id])
+  farmSeasons  FarmSeason[]
+
+  @@map("plantemplates")
+}
+
+// Embedded Type for Stage
+type Stage {
+  stageName String
+  startDay  Int
+  endDay    Int
+  tasks     Task[]
+}
+
+// Embedded Type for Task
+type Task {
+  taskName           String
+  frequency          String?
+  scheduledDate      String?
+  suggestedMaterials SuggestedMaterial[]
+}
+
+// Embedded Type for SuggestedMaterial
+type SuggestedMaterial {
+  materialName         String
+  suggestedQuantityUnit String?
+}
+
+// ============================================
+// 6. MaterialUsage Model
+// ============================================
+model MaterialUsage {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  materialName String
+  usageCount   Int      @default(1)
+  lastUsedAt   DateTime @default(now())
+  
+  // Foreign Key
+  userId       String   @db.ObjectId
+
+  // Relations
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, materialName])
+  @@index([userId, usageCount(sort: Desc)])
+  @@map("materialusages")
+}
+
+// ============================================
+// 7. HiddenTask Model
+// ============================================
+model HiddenTask {
+  id         String          @id @default(auto()) @map("_id") @db.ObjectId
+  taskName   String
+  hiddenDate DateTime        @default(now())
+  reason     HiddenReason    // DONE, SKIPPED
+  
+  // Foreign Keys
+  seasonId   String          @db.ObjectId
+  userId     String?         @db.ObjectId
+
+  // Relations
+  season     FarmSeason      @relation(fields: [seasonId], references: [id])
+  user       User?           @relation(fields: [userId], references: [id])
+
+  @@unique([seasonId, taskName])
+  @@map("hiddentasks")
+}
+
+enum HiddenReason {
+  DONE
+  SKIPPED
+}

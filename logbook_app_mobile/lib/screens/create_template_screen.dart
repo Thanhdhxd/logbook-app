@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/plan_template.dart';
 import '../services/template_service.dart';
+import '../utils/snackbar_helper.dart';
 
 class CreateTemplateScreen extends StatefulWidget {
   const CreateTemplateScreen({super.key});
@@ -51,28 +52,32 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (stageName.isNotEmpty) {
-                  // Tự động tính ngày bắt đầu và kết thúc
-                  int startDay = 1;
-                  int endDay = 10;
-                  
-                  if (_stages.isNotEmpty) {
-                    // Giai đoạn mới bắt đầu sau giai đoạn cuối cùng
-                    final lastStage = _stages.last;
-                    startDay = lastStage.endDay + 1;
-                    endDay = startDay + 9; // Mỗi giai đoạn mặc định 10 ngày
-                  }
-                  
-                  setState(() {
-                    _stages.add(Stage(
-                      stageName: stageName,
-                      startDay: startDay,
-                      endDay: endDay,
-                      tasks: [],
-                    ));
-                  });
-                  Navigator.pop(context);
+                if (stageName.isEmpty) {
+                  SnackbarHelper.showWarning(context, 'Cần nhập tên giai đoạn');
+                  return;
                 }
+                
+                // Tự động tính ngày bắt đầu và kết thúc
+                int startDay = 1;
+                int endDay = 10;
+                
+                if (_stages.isNotEmpty) {
+                  // Giai đoạn mới bắt đầu sau giai đoạn cuối cùng
+                  final lastStage = _stages.last;
+                  startDay = lastStage.endDay + 1;
+                  endDay = startDay + 9; // Mỗi giai đoạn mặc định 10 ngày
+                }
+                
+                setState(() {
+                  _stages.add(Stage(
+                    stageName: stageName,
+                    startDay: startDay,
+                    endDay: endDay,
+                    tasks: [],
+                  ));
+                });
+                Navigator.pop(context);
+                SnackbarHelper.showSuccess(this.context, 'Đã thêm giai đoạn "$stageName"');
               },
               child: const Text('Thêm'),
             ),
@@ -95,10 +100,12 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
           ),
           ElevatedButton(
             onPressed: () {
+              final stageName = _stages[index].stageName;
               setState(() {
                 _stages.removeAt(index);
               });
               Navigator.pop(context);
+              SnackbarHelper.showInfo(this.context, 'Đã xóa giai đoạn "$stageName"');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -196,30 +203,34 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (taskName.isNotEmpty) {
-                      final materials = materialSuggestion.isEmpty 
-                          ? <SuggestedMaterial>[]
-                          : materialSuggestion.split(',').map((m) {
-                              return SuggestedMaterial(
-                                materialName: m.trim(),
-                                suggestedQuantityUnit: null,
-                              );
-                            }).toList();
-                      
-                      final scheduledDateStr = selectedDate != null
-                          ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
-                          : null;
-                      
-                      this.setState(() {
-                        _stages[stageIndex].tasks.add(Task(
-                          taskName: taskName,
-                          frequency: frequency,
-                          scheduledDate: scheduledDateStr,
-                          suggestedMaterials: materials,
-                        ));
-                      });
-                      Navigator.pop(context);
+                    if (taskName.isEmpty) {
+                      SnackbarHelper.showWarning(context, 'Cần nhập tên công việc');
+                      return;
                     }
+                    
+                    final materials = materialSuggestion.isEmpty 
+                        ? <SuggestedMaterial>[]
+                        : materialSuggestion.split(',').map((m) {
+                            return SuggestedMaterial(
+                              materialName: m.trim(),
+                              suggestedQuantityUnit: null,
+                            );
+                          }).toList();
+                    
+                    final scheduledDateStr = selectedDate != null
+                        ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
+                        : null;
+                    
+                    this.setState(() {
+                      _stages[stageIndex].tasks.add(Task(
+                        taskName: taskName,
+                        frequency: frequency,
+                        scheduledDate: scheduledDateStr,
+                        suggestedMaterials: materials,
+                      ));
+                    });
+                    Navigator.pop(context);
+                    SnackbarHelper.showSuccess(this.context, 'Đã thêm công việc "$taskName"');
                   },
                   child: const Text('Thêm'),
                 ),
@@ -232,9 +243,11 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
   }
 
   void _deleteTask(int stageIndex, int taskIndex) {
+    final taskName = _stages[stageIndex].tasks[taskIndex].taskName;
     setState(() {
       _stages[stageIndex].tasks.removeAt(taskIndex);
     });
+    SnackbarHelper.showInfo(context, 'Đã xóa công việc "$taskName"');
   }
 
   Future<void> _saveTemplate() async {
@@ -243,11 +256,9 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
     }
 
     if (_stages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng thêm ít nhất 1 giai đoạn'),
-          backgroundColor: Colors.orange,
-        ),
+      SnackbarHelper.showWarning(
+        context,
+        'Vui lòng thêm ít nhất 1 giai đoạn',
       );
       return;
     }
@@ -268,21 +279,17 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
       await _templateService.createTemplate(template);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✓ Đã tạo kế hoạch thành công'),
-            backgroundColor: Colors.green,
-          ),
+        SnackbarHelper.showSuccess(
+          context,
+          '✓ Đã tạo kế hoạch thành công',
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
-          ),
+        SnackbarHelper.showError(
+          context,
+          'Lỗi: $e',
         );
       }
     } finally {

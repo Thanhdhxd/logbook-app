@@ -17,6 +17,7 @@ require('./models/MaterialUsage');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 // Import routes
+const authRoutes = require('./routes/authRoutes');
 const templateRoutes = require('./routes/templateRoutes');
 const seasonRoutes = require('./routes/seasonRoutes');
 const logbookRoutes = require('./routes/logbookRoutes');
@@ -58,6 +59,7 @@ app.get('/', (req, res) => {
 });
 
 // *** API Routes ***
+app.use('/api/auth', authRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/seasons', seasonRoutes);
 app.use('/api/logbook', logbookRoutes);

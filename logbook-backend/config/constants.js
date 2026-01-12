@@ -6,8 +6,10 @@ module.exports = {
     // Server
     PORT: process.env.PORT || 3000,
     
-    // Authentication (tạm thời hardcoded, sau này sẽ thay bằng JWT)
+    // Authentication
     DEFAULT_USER_ID: '60c72b2f9f1b2c0015b8d4f4',
+    JWT_SECRET: process.env.JWT_SECRET || 'logbook-secret-key-2026-change-in-production',
+    JWT_EXPIRES_IN: '7d', // Token hết hạn sau 7 ngày
     
     // Task Status
     TASK_STATUS: {

@@ -126,8 +126,9 @@ class _DailyTaskScreenState extends State<DailyTaskScreen> {
       ),
     );
 
-    if (result == true) {
-      _loadTasks(); // Reload tasks
+    if (result == true && mounted) {
+      // Reload tasks ngay lập tức khi quay về
+      await _loadTasks();
     }
   }
 
@@ -219,7 +220,7 @@ class _DailyTaskScreenState extends State<DailyTaskScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Mùa vụ này chưa có kế hoạch canh tác.\nVui lòng thêm kế hoạch hoặc tạo nhật ký thủ công.',
+                'Mùa vụ này chưa có kế hoạch canh tác.\nVui lòng thêm kế hoạch để bắt đầu.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600),
               ),
@@ -232,29 +233,6 @@ class _DailyTaskScreenState extends State<DailyTaskScreen> {
                   style: const TextStyle(color: Colors.grey),
                 ),
               ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MaterialSelectionScreen(
-                      seasonId: widget.season.id,
-                      seasonLocation: widget.season.farmArea,
-                    ),
-                  ),
-                ).then((value) {
-                  if (value == true) _loadTasks();
-                });
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Tạo nhật ký thủ công'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
           ],
         ),
       );

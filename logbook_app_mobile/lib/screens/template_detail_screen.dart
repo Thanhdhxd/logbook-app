@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/plan_template.dart';
 import '../services/template_service.dart';
+import '../utils/snackbar_helper.dart';
 
 class TemplateDetailScreen extends StatefulWidget {
   final PlanTemplate template;
@@ -37,21 +38,17 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
       await _templateService.updateTemplate(_template.id, _template);
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✓ Đã lưu kế hoạch'),
-            backgroundColor: Colors.green,
-          ),
+        SnackbarHelper.showSuccess(
+          context,
+          '✓ Đã lưu kế hoạch',
         );
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
-          ),
+        SnackbarHelper.showError(
+          context,
+          'Lỗi: $e',
         );
       }
     } finally {
@@ -87,28 +84,32 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (stageName.isNotEmpty) {
-                  // Tự động tính ngày bắt đầu và kết thúc
-                  int startDay = 1;
-                  int endDay = 10;
-                  
-                  if (_template.stages.isNotEmpty) {
-                    // Giai đoạn mới bắt đầu sau giai đoạn cuối cùng
-                    final lastStage = _template.stages.last;
-                    startDay = lastStage.endDay + 1;
-                    endDay = startDay + 9; // Mỗi giai đoạn mặc định 10 ngày
-                  }
-                  
-                  setState(() {
-                    _template.stages.add(Stage(
-                      stageName: stageName,
-                      startDay: startDay,
-                      endDay: endDay,
-                      tasks: [],
-                    ));
-                  });
-                  Navigator.pop(context);
+                if (stageName.isEmpty) {
+                  SnackbarHelper.showWarning(context, 'Cần nhập tên giai đoạn');
+                  return;
                 }
+                
+                // Tự động tính ngày bắt đầu và kết thúc
+                int startDay = 1;
+                int endDay = 10;
+                
+                if (_template.stages.isNotEmpty) {
+                  // Giai đoạn mới bắt đầu sau giai đoạn cuối cùng
+                  final lastStage = _template.stages.last;
+                  startDay = lastStage.endDay + 1;
+                  endDay = startDay + 9; // Mỗi giai đoạn mặc định 10 ngày
+                }
+                
+                setState(() {
+                  _template.stages.add(Stage(
+                    stageName: stageName,
+                    startDay: startDay,
+                    endDay: endDay,
+                    tasks: [],
+                  ));
+                });
+                Navigator.pop(context);
+                SnackbarHelper.showSuccess(this.context, 'Đã thêm giai đoạn "$stageName"');
               },
               child: const Text('Thêm'),
             ),
@@ -131,10 +132,12 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
           ),
           ElevatedButton(
             onPressed: () {
+              final stageName = _template.stages[index].stageName;
               setState(() {
                 _template.stages.removeAt(index);
               });
               Navigator.pop(context);
+              SnackbarHelper.showInfo(this.context, 'Đã xóa giai đoạn "$stageName"');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
@@ -232,30 +235,34 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (taskName.isNotEmpty) {
-                      final materials = materialSuggestion.isEmpty 
-                          ? <SuggestedMaterial>[]
-                          : materialSuggestion.split(',').map((m) {
-                              return SuggestedMaterial(
-                                materialName: m.trim(),
-                                suggestedQuantityUnit: null,
-                              );
-                            }).toList();
-                      
-                      final scheduledDateStr = selectedDate != null
-                          ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
-                          : null;
-                      
-                      this.setState(() {
-                        _template.stages[stageIndex].tasks.add(Task(
-                          taskName: taskName,
-                          frequency: frequency,
-                          scheduledDate: scheduledDateStr,
-                          suggestedMaterials: materials,
-                        ));
-                      });
-                      Navigator.pop(context);
+                    if (taskName.isEmpty) {
+                      SnackbarHelper.showWarning(context, 'Cần nhập tên công việc');
+                      return;
                     }
+                    
+                    final materials = materialSuggestion.isEmpty 
+                        ? <SuggestedMaterial>[]
+                        : materialSuggestion.split(',').map((m) {
+                            return SuggestedMaterial(
+                              materialName: m.trim(),
+                              suggestedQuantityUnit: null,
+                            );
+                          }).toList();
+                    
+                    final scheduledDateStr = selectedDate != null
+                        ? '${selectedDate!.day.toString().padLeft(2, '0')}/${selectedDate!.month.toString().padLeft(2, '0')}/${selectedDate!.year}'
+                        : null;
+                    
+                    this.setState(() {
+                      _template.stages[stageIndex].tasks.add(Task(
+                        taskName: taskName,
+                        frequency: frequency,
+                        scheduledDate: scheduledDateStr,
+                        suggestedMaterials: materials,
+                      ));
+                    });
+                    Navigator.pop(context);
+                    SnackbarHelper.showSuccess(this.context, 'Đã thêm công việc "$taskName"');
                   },
                   child: const Text('Thêm'),
                 ),
@@ -268,9 +275,11 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
   }
 
   void _deleteTask(int stageIndex, int taskIndex) {
+    final taskName = _template.stages[stageIndex].tasks[taskIndex].taskName;
     setState(() {
       _template.stages[stageIndex].tasks.removeAt(taskIndex);
     });
+    SnackbarHelper.showInfo(context, 'Đã xóa công việc "$taskName"');
   }
 
   void _editTask(int stageIndex, int taskIndex) {

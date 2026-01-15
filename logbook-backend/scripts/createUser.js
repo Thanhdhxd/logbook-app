@@ -21,27 +21,27 @@ const createSampleUsers = async () => {
         const sampleUsers = [
             {
                 name: 'Nguyễn Văn A',
-                email: 'admin@logbook.com',
+                username: 'admin',
                 password: 'admin123'
             },
             {
                 name: 'Trần Thị B',
-                email: 'user@logbook.com',
+                username: 'user',
                 password: 'user123'
             },
             {
                 name: 'Demo User',
-                email: 'demo@example.com',
+                username: 'demo',
                 password: 'demo123'
             }
         ];
         
         for (const userData of sampleUsers) {
             // Kiểm tra xem user đã tồn tại chưa
-            const existingUser = await User.findOne({ email: userData.email });
+            const existingUser = await User.findOne({ username: userData.username });
             
             if (existingUser) {
-                console.log(`⚠️  User ${userData.email} đã tồn tại, bỏ qua...`);
+                console.log(`⚠️  User ${userData.username} đã tồn tại, bỏ qua...`);
                 continue;
             }
             
@@ -51,18 +51,18 @@ const createSampleUsers = async () => {
             // Tạo user mới
             const newUser = await User.create({
                 name: userData.name,
-                email: userData.email,
+                username: userData.username,
                 password: hashedPassword
             });
             
-            console.log(`✅ Đã tạo user: ${userData.name} (${userData.email})`);
+            console.log(`✅ Đã tạo user: ${userData.name} (${userData.username})`);
             console.log(`   Password: ${userData.password}`);
         }
         
         console.log('\n🎉 Hoàn thành! Danh sách tài khoản:');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         sampleUsers.forEach(user => {
-            console.log(`Email: ${user.email}`);
+            console.log(`Tên tài khoản: ${user.username}`);
             console.log(`Password: ${user.password}`);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         });

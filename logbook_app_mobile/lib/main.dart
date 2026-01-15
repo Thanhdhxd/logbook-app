@@ -1,12 +1,22 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/season_selection_screen.dart';
-import 'utils/storage_helper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'config/environment.dart';
+import 'core/network/app_logger.dart';
+import 'presentation/providers/auth_providers.dart';
+import 'presentation/screens/login_screen.dart';
+import 'presentation/screens/season_selection_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  
+  // In thông tin môi trường khi app start
+  Environment.printInfo();
+  
+  // Log app started
+  AppLogger.instance.info('🚀 Application started');
+  
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -31,13 +41,15 @@ class MyApp extends StatelessWidget {
 }
 
 // Widget kiểm tra trạng thái đăng nhập
-class AuthCheck extends StatelessWidget {
+class AuthCheck extends ConsumerWidget {
   const AuthCheck({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final checkLoginStatusUseCase = ref.read(checkLoginStatusUseCaseProvider);
+
     return FutureBuilder<bool>(
-      future: StorageHelper.isLoggedIn(),
+      future: checkLoginStatusUseCase.execute(),
       builder: (context, snapshot) {
         // Đang kiểm tra
         if (snapshot.connectionState == ConnectionState.waiting) {

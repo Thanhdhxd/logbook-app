@@ -57,20 +57,20 @@ router.get('/:seasonId', asyncHandler(async (req, res) => {
                 if (taskLogs.length > 0) {
                     // Task đã hoàn thành - gộp tất cả logs
                     const allMaterials = [];
-                    let notes = [];
+                    const notesSet = new Set(); // Dùng Set để tránh duplicate
 
                     taskLogs.forEach(log => {
                         if (log.usedMaterials && log.usedMaterials.length > 0) {
                             allMaterials.push(...log.usedMaterials);
                         }
-                        if (log.notes) {
-                            notes.push(log.notes);
+                        if (log.notes && log.notes.trim()) {
+                            notesSet.add(log.notes.trim());
                         }
                     });
 
                     taskInfo.completedDates = taskLogs.map(log => log.logDate);
                     taskInfo.materials = allMaterials;
-                    taskInfo.notes = notes.join('; ');
+                    taskInfo.notes = Array.from(notesSet).join('; ');
                 }
 
                 stageTasks.push(taskInfo);

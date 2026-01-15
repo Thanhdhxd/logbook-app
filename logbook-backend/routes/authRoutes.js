@@ -13,32 +13,32 @@ const { asyncHandler } = require('../middleware/errorHandler');
  * Đăng nhập và nhận JWT token
  */
 router.post('/login', asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     
     // Validate input
-    if (!email || !password) {
-        return errorResponse(res, 'Email và mật khẩu là bắt buộc', 400);
+    if (!username || !password) {
+        return errorResponse(res, 'Tên tài khoản và mật khẩu là bắt buộc', 400);
     }
     
-    // Tìm user theo email
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Tìm user theo username
+    const user = await User.findOne({ username: username.toLowerCase() });
     
     if (!user) {
-        return errorResponse(res, 'Email hoặc mật khẩu không chính xác', 401);
+        return errorResponse(res, 'Tên tài khoản hoặc mật khẩu không chính xác', 401);
     }
     
     // Kiểm tra password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     
     if (!isPasswordValid) {
-        return errorResponse(res, 'Email hoặc mật khẩu không chính xác', 401);
+        return errorResponse(res, 'Tên tài khoản hoặc mật khẩu không chính xác', 401);
     }
     
     // Tạo JWT token
     const token = jwt.sign(
         { 
             userId: user._id.toString(),
-            email: user.email,
+            username: user.username,
             name: user.name
         },
         JWT_SECRET,
@@ -51,7 +51,7 @@ router.post('/login', asyncHandler(async (req, res) => {
         user: {
             id: user._id.toString(),
             name: user.name,
-            email: user.email
+            username: user.username
         }
     }, 'Đăng nhập thành công');
 }));
@@ -81,7 +81,7 @@ router.post('/verify', asyncHandler(async (req, res) => {
             user: {
                 id: user._id.toString(),
                 name: user.name,
-                email: user.email
+                username: user.username
             }
         }, 'Token hợp lệ');
     } catch (error) {

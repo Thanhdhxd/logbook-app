@@ -26,7 +26,7 @@ const LogEntrySchema = new mongoose.Schema({
     // Trạng thái (Quan trọng cho logic To-do List)
     status: {
         type: String,
-        enum: ['DONE', 'SKIPPED', 'MANUAL'], // Hoàn thành, Bỏ qua, Thủ công
+        enum: ['DONE', 'SKIPPED', 'MANUAL', 'PENDING', 'IN_PROGRESS'], // Hoàn thành, Bỏ qua, Thủ công, Chưa làm, Đang làm
         required: true
     },
     

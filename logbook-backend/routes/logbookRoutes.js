@@ -1,6 +1,7 @@
 // routes/logbookRoutes.js
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const LogEntry = require('../models/LogEntry');
 const { isAuth } = require('../middleware/auth');
 const { successResponse, errorResponse } = require('../utils/responseFormatter');
@@ -172,6 +173,64 @@ router.get('/season/:seasonId', asyncHandler(async (req, res) => {
         MESSAGES.SUCCESS.DATA_RETRIEVED,
         200
     );
+}));
+
+/**
+ * POST /api/logbook/hide
+ * Chức năng: Ẩn task vĩnh viễn (bỏ qua)
+ */
+router.post('/hide', asyncHandler(async (req, res) => {
+    const { season, taskName } = req.body;
+    
+    console.log('\n🚫 POST /api/logbook/hide');
+    console.log('  - season:', season);
+    console.log('  - taskName:', taskName);
+
+    // Validation
+    if (!season || !taskName) {
+        console.log('❌ Thiếu thông tin bắt buộc');
+        return errorResponse(res, 'Thiếu thông tin bắt buộc', 400);
+    }
+
+    // Convert season sang ObjectId nếu cần
+    const seasonObjectId = mongoose.Types.ObjectId.isValid(season) 
+        ? new mongoose.Types.ObjectId(season) 
+        : season;
+
+    // Tạo hidden task
+    const HiddenTask = require('../models/HiddenTask');
+    
+    try {
+        const hiddenTask = await HiddenTask.findOneAndUpdate(
+            {
+                season: seasonObjectId,
+                taskName: taskName
+            },
+            {
+                season: seasonObjectId,
+                taskName: taskName,
+                reason: 'SKIPPED',
+                hiddenDate: new Date()
+            },
+            {
+                upsert: true,
+                new: true,
+                setDefaultsOnInsert: true
+            }
+        );
+
+        console.log('✅ Đã ẩn task thành công:', hiddenTask._id);
+
+        return successResponse(
+            res,
+            { hidden: true, hiddenTaskId: hiddenTask._id },
+            'Đã ẩn task thành công',
+            200
+        );
+    } catch (error) {
+        console.error('❌ Lỗi khi ẩn task:', error);
+        return errorResponse(res, 'Lỗi khi ẩn task: ' + error.message, 500);
+    }
 }));
 
 module.exports = router;

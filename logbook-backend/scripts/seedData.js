@@ -32,7 +32,7 @@ async function seedData() {
         console.log('👤 Tạo user mẫu...');
         const user = await User.create({
             name: 'Nông dân Demo',
-            email: 'demo@example.com',
+            username: 'demo',
             password: '$2a$10$rQqX7KZ4N0yH3FJhQz4kI.xYZ123ABC'  // Demo password hash
         });
         console.log('✅ Đã tạo user:', user.name);
@@ -175,7 +175,7 @@ async function seedData() {
         console.log(`   - Seasons: 1`);
         console.log(`   - Log Entries: 1`);
         console.log('\n🔑 Thông tin đăng nhập:');
-        console.log(`   Email: demo@example.com`);
+        console.log(`   Tên tài khoản: demo`);
         console.log(`   Password: demo123`);
 
     } catch (error) {
